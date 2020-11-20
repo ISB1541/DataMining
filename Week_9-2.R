@@ -1,53 +1,47 @@
-## 9-2주차
+# 9-2주차
 
-# 선형 회귀
-## lm을 이용해 최적화 풀기
-x = c(3.0, 6.0, 9.0, 12.0)
-y = c(3.0, 4.0 ,5.5, 6.5)
-m = lm(y ~ x)
-m
-plot(x, y)
-abline(m, col='red')
+# 예제) 할인율에 따른 이익 '머플러 판매 데이터'
+muffler = data.frame(discount = c(2.0, 4.0, 6.0, 8.0, 10.0), profit = c(0, 0, 0, 1, 1))
+g = glm(profit~discount, data = muffler, family = binomial) # lm 대신 glm 함수, binomial 옵션은 두가지 값만 가짐을 의미
+coef(g)
+fitted(g)
+residuals(g)
 
-# 모델의 특성
-coef(m) # 매계변수(계수) 값
-fitted(m) # 훈련집합의 샘플에 대한 예측값 
-residuals(m) # 잔차
-deviance(m) / length(x) # 잔차 제곱합을 평균 제곱 오차로 변환하여 출력 MSE
-summary(m)
+## 시각화
+plot(muffler, pch = 20, cex = 2)
+abline(g, col = 'blue', lwd = 2)
 
-# 예측 함수
-newx = data.frame(x=c(1.2, 2.0, 20.65))
-predict(m, newdata = newx)
+## 새로운 데이터 예측
+newd = data.frame(discount = c(1, 5, 12, 20, 30))
+p = predict(g, newd, type='response') # response는 예측 수행시 0~1사이의 확률을 구해줌
+print(p)
 
-# 실습
-str(cars)
-head(cars)
-plot(cars)
-car_model=lm(dist~speed, data = cars)
-coef(car_model)
-abline(car_model, col="red")
-fitted(car_model) # 4번째 샘플 (7, 22) 0.94 실제값 22 -> 12만큼 오차 발생
-residuals(car_model)
+## 그래프
+plot(muffler, pch = 20, cex = 2, xlim = c(0, 32))
+abline(g, col = 'blue', lwd = 2)
+res = data.frame(discount = newd, profit = p)
+points(res, pch = 20, cex = 2, col = 'red')
+legend("bottomright", legend = c("train data", "new data"), pch = c(20, 20), cex = 2,
+       col = c("black", "red"), bg ="gray")
 
-## 시속 21.5일 때 제동거리는?
-nx1 = data.frame(speed=c(21.5))
-predict(car_model, nx1)
+# 실제 데이터 적용예제(Haberman survival)
 
-## 시속 25부터 0.5씩 증가시키며 달렸을 때 제동거리의 변화
-nx2 = data.frame(speed=c(25.0, 25.5, 26.0, 26.5, 27.0, 27.5, 28.0))
-predict(car_model, nx2)
+## 파일 불러오기
+haberman = read.csv("https://archive.ics.uci.edu/ml/machine-learning-databases/haberman/haberman.data",
+                    header = FALSE)
+names(haberman) = c('age', 'op_year', 'no_nodes', 'survival')
+str(haberman)
 
-nx = data.frame(speed=c(21.5, 25.0, 25.5, 26.0, 26.5, 27.0, 27.5, 28.0))
-plot(nx$speed, predict(car_model, nx), col="red", cex = 2, pch = 20)
-abline(car_model)
+haberman$survival %>% = factor(haberman$survival) # glm 함수는 label이 0,1 혹은 (범주형, factor)
+str(haberman)
 
-## 과제
-x = c(10.0, 12.0, 9.5, 22.2, 8.0)
-y = c(360.2, 420.0, 359.5, 679.0, 315.3)
-m = lm(y ~ x)
-plot(x, y)
-abline(m, col='green')
+## y = survival, 나머지 x일 때 . 으로 대체 가능
+h = glm(survival ~ age + op_year + no_nodes, data = haberman, family = binomial)
+coef(h)
+deviance(h)
 
-newx = data.frame(x=c(10.5, 25.0, 15.0))
-predict(m, newdata = newx)
+## 새로운 환자에 대한 생존여부 예측
+new_patients = data.frame(age = c(37, 66), op_year = c(58, 60), no_nodes = c(5, 32))
+predict(h, newdata = new_patients, type = 'response')
+
+### 결과 값 0.2225961 -> case 1(5년 이상) : 78%, csae 2(5년 이하) : 22%
