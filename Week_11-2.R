@@ -20,7 +20,7 @@ table(p, iris$Species)
 
 # svm의 하이퍼 매개변수 (C)
 
-s = svm(Species~., data=iris, cost=100) # cost 100 설정
+s = svm(Species~., data=iris, cost=2000) # cost 100 설정
 
 # 훈련집합에 대한 에러 확인 
 ## c가 작아질 수록 훈련집합에 대한 에러율은 줄어들지만 새로운 데이터에 대한 에러율은 높아진다.
@@ -46,3 +46,5 @@ r=train(Species~., data=iris, method='rpart')
 t=train(Species~., data=iris, method='rt')
 s=train(Species~., data=iris, method='svmRadital')
 k=train(Species~., data=iris, method='knn')
+
+names((getModelInfo()))
