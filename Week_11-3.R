@@ -30,3 +30,27 @@ str(voice)
 table(is.na(voice))
 
 # f = randomForest
+
+# Assignment
+ucla = read.csv('https://stats.idre.ucla.edu/stat/data/binary.csv')
+str(ucla)
+ucla$admit=factor(ucla$admit)
+ucla$admit
+
+r= rpart(admit~., data=ucla)
+par(mfcol=c(1,1), xpd=NA)
+plot(r)
+text(r, use.n=TRUE)
+
+# rpart 적용 - 정확도 (249 + 54)/ 400 = 80.5%
+p = predict(r, ucla, type='class')
+table(p, ucla$admit)
+
+# randomForest 적용 - 정확도 73.25%
+f = randomForest(admit~., data=ucla)
+print(f)
+
+# SVM 적용(cost=1) - 72.25%
+s=svm(admit~., data=ucla, cost=1)
+print(s)
+table(predict(s, ucla), ucla$admit)
